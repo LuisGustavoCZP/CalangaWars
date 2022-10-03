@@ -1,25 +1,18 @@
 import { useEffect, useState } from "react";
 import { GameController } from "../controllers/game";
 import { gameData } from "../data/game";
-import { load } from "../loaders/gltf-loader";
+import { GameObject } from "../entities/gameobject";
 
+let rodando = false;
 
 export function GameManager ()
 {
-
-    async function loadThings ()
-    {
-        const spaceship = await load("../assets/meshs/glft/spaceships/craft_speederA.glb");
-        console.log(spaceship);
-        gameData.scene!.add(spaceship);
-        spaceship.position.set(0, 0, 0);
-    }
-
     useEffect(()=> 
     {
+        if(rodando) return;
+        rodando = true;
         const gameManager = new GameController();
         gameManager.start();
-        loadThings ();
     }, []);
 
     return (
