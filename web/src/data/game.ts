@@ -1,4 +1,4 @@
-import { Scene, PerspectiveCamera, WebGLRenderer, AmbientLight, DirectionalLight, Camera, Clock, TextureLoader } from "three";
+import { Scene, PerspectiveCamera, WebGLRenderer, AmbientLight, DirectionalLight, Camera, Clock, TextureLoader, CubeTextureLoader, LinearFilter, ShaderLib, ShaderMaterial, BackSide, BoxGeometry, Mesh } from "three";
 
 export class GameData
 {
@@ -22,7 +22,29 @@ export class GameData
         this.directionalLight.castShadow = true;
         this.scene.add(this.directionalLight);
 
-        //this.scene.background = new TextureLoader().load("")
+        /* const loader = new CubeTextureLoader();
+        const texture = loader.load([
+            "../assets/textures/skybox/milkyway_2048.jpg"
+        ]);
+        this.scene.background = texture; */
+        const loader = new TextureLoader();
+        const texture = loader.load(
+            "../assets/textures/skybox/milkyway_2048.jpg"
+        );
+        texture.magFilter = LinearFilter;
+        texture.minFilter = LinearFilter;
+        const shader = ShaderLib.equirect;
+        const material = new ShaderMaterial({
+            fragmentShader: shader.fragmentShader,
+            vertexShader: shader.vertexShader,
+            uniforms: shader.uniforms,
+            depthWrite: false,
+            side: BackSide,
+        });
+        material.uniforms.tEquirect.value = texture;
+        const plane = new BoxGeometry(1000, 1000, 1000);
+        const bgMesh = new Mesh(plane, material);
+        this.scene.add(bgMesh);
 
         this.#clock = new Clock();
         this.#deltaTime = 0;
