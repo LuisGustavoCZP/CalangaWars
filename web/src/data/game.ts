@@ -29,7 +29,7 @@ export class GameData
         this.scene.background = texture; */
         const loader = new TextureLoader();
         const texture = loader.load(
-            "../assets/textures/skybox/milkyway_2048.jpg"
+            "./assets/textures/skybox/milkyway_2048.jpg"
         );
         texture.magFilter = LinearFilter;
         texture.minFilter = LinearFilter;
