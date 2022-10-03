@@ -12,16 +12,20 @@ export class PlayerController
     lookDir : Vector3;
     initCameraRotation : Euler;
     dragging : boolean;
+    rotateDir : Vector2;
+    moveDir : Vector2;
+
     constructor (camera : Camera, canvas : HTMLCanvasElement)
     {
         this.dragging = false;
         this.cameraTarget = null;
         this.camera = camera;
 
-        //const cr = this.camera.rotation.clone();
-        //const crw = this.camera.localToWorld(new Vector3(cr.x, cr.y, cr.z))
-        this.initCameraRotation = this.camera.rotation.clone()//new Euler(crw.x, crw.y, crw.z);
-        this.lookDir = new Vector3(0, 0, -1);//Math.PI
+        this.initCameraRotation = this.camera.rotation.clone()
+        this.lookDir = new Vector3(0, 0, -1);
+        this.rotateDir = new Vector2(0,0);
+        this.moveDir = new Vector2(0,0);
+
         canvas.style.cursor = "pointer";
         canvas.onpointerdown = (e) => 
         {
@@ -39,15 +43,30 @@ export class PlayerController
         window.onpointermove = (e) => 
         {
             if(!this.dragging) return;
-//-e.movementX
-            this.lookDir.addScaledVector(this.cameraTarget!.localToWorld(new Vector3(-e.movementX, e.movementY)), gameData.deltaTime!*1);
-            //this.lookDir.clamp(new Vector3(0, .1, 0), new Vector3(0, .9, 0));
-            //const clamped = this.cameraTarget!.worldToLocal(this.lookDir)
-            //if(this.lookDir.y < -.3) this.lookDir.y = -.3;
-            //else if(this.lookDir.y > .3) this.lookDir.y = .3;
-            //console.log(this.lookDir);
-            //this.lookDir = this.cameraTarget!.localToWorld(clamped);
+            this.lookDir.addScaledVector(this.cameraTarget!.localToWorld(new Vector3(-e.movementX, e.movementY)).sub(this.cameraTarget!.position), gameData.deltaTime!*1);
         };
+
+        window.onkeydown = (e) => 
+        {
+            if(e.key == "w") this.rotateDir.y = -1;
+            else if(e.key == "s") this.rotateDir.y = 1;
+
+            if(e.key == "a") this.rotateDir.x = 1;
+            else if(e.key == "d") this.rotateDir.x = -1;
+
+            if(e.key == " ") this.moveDir.y = 1;
+        }
+
+        window.onkeyup = (e) => 
+        {
+            if(e.key == "w") this.rotateDir.y = 0;
+            else if(e.key == "s") this.rotateDir.y = 0;
+
+            if(e.key == "a") this.rotateDir.x = 0;
+            else if(e.key == "d") this.rotateDir.x = 0;
+
+            if(e.key == " ") this.moveDir.y = 0;
+        }
         
     }
 
@@ -55,7 +74,10 @@ export class PlayerController
     {
         if(this.cameraTarget)
         {
-            //this.cameraTarget!.position.z += 1*gameData.deltaTime!;
+            if(this.rotateDir.x != 0 || this.rotateDir.y != 0)
+            {
+                this.lookDir.add(this.cameraTarget!.localToWorld(new Vector3(this.rotateDir.x*gameData.deltaTime!*(1+(2*this.moveDir.y)), this.rotateDir.y*gameData.deltaTime!*(1+(1*this.moveDir.y)))).sub(this.cameraTarget!.position));
+            }
 
             if(this.camera)
             {
@@ -63,15 +85,12 @@ export class PlayerController
                 const dir = this.cameraTarget.localToWorld(new Vector3(0, 5, 10));
                 
                 this.cameraTarget.lookAt(new Vector3(this.lookDir.x+targetPos.x, this.lookDir.y+targetPos.y, this.lookDir.z+targetPos.z))
-                //this.cameraTarget.rotation.x = this.lookDir.x;
-                //this.cameraTarget.rotation.y = this.lookDir.y;
-                //this.cameraTarget.rotation.z = this.lookDir.z;
 
                 this.camera.position.set(dir.x, dir.y, dir.z);
                 this.camera.lookAt(targetPos);
-                //const lookToW = this.camera.localToWorld(new Vector3(this.lookDir.x, this.lookDir.y, 0));
-                //const lookToL = this.cameraTarget.worldToLocal(this.lookDir);
             }
         }
+
+        if(this.moveDir.y != 0 || this.moveDir.x != 0) this.cameraTarget!.translateOnAxis(new Vector3(this.moveDir.x, 0, -this.moveDir.y).normalize(), 50*gameData.deltaTime!);
     }
 }
