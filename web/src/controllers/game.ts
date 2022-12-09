@@ -29,11 +29,14 @@ export class GameController
     async loadThings ()
     {
         const spaceship = await load("./assets/meshs/glft/spaceships/nave1.glb");
-        gameData.scene!.add(spaceship);
-        spaceship.position.set(0, 0, 0);
-        spaceship.rotation.set(0, 1*Math.PI, 0);
+        const spaceshipContainer = new Object3D();
 
-        this.playerController.cameraTarget = spaceship; 
+        spaceshipContainer.attach(spaceship);
+        spaceshipContainer.position.set(0, 0, 0);
+        spaceshipContainer.rotation.set(0, 1*Math.PI, 0);
+        gameData.scene!.add(spaceshipContainer);
+
+        this.playerController.cameraTarget = spaceshipContainer; 
 
         const spaceship2 = await load("./assets/meshs/glft/spaceships/navee.glb");
         gameData.scene!.add(spaceship2);

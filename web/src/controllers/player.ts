@@ -77,6 +77,8 @@ export class PlayerController
             if(this.rotateDir.x != 0 || this.rotateDir.y != 0)
             {
                 this.lookDir.add(this.cameraTarget!.localToWorld(new Vector3(this.rotateDir.x*gameData.deltaTime!*(1+(2*this.moveDir.y)), this.rotateDir.y*gameData.deltaTime!*(1+(1*this.moveDir.y)))).sub(this.cameraTarget!.position));
+                this.lookDir.clampLength(-1, 1);
+                console.log(this.lookDir)
             }
 
             if(this.camera)
